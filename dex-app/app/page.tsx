@@ -9,23 +9,23 @@ export default function Page() {
   const connect = async () => {
     const w = window as any;
     const provider = w.ethereum?.providers?.find((p: any) => p?.isMetaMask) || w.ethereum;
-    if (!provider) return setMsg("MetaMask não encontrada");
+    if (!provider) return setMsg("MetaMask not found");
     const accounts = await provider.request({ method: "eth_requestAccounts" });
     setWallet(accounts?.[0] || "");
-    setMsg("Carteira conectada");
+    setMsg("Wallet connected");
   };
 
   const addNetwork = async () => {
     const w = window as any;
     const provider = w.ethereum?.providers?.find((p: any) => p?.isMetaMask) || w.ethereum;
-    if (!provider) return setMsg("MetaMask não encontrada");
+    if (!provider) return setMsg("MetaMask not found");
 
     try {
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x337b2" }] });
-      setMsg("TRN Chain selecionada");
+      setMsg("TRN Chain selected");
       return;
     } catch (e: any) {
-      if (e?.code !== 4902) return setMsg("Erro ao trocar rede");
+      if (e?.code !== 4902) return setMsg("Failed to switch network");
     }
 
     await provider.request({
@@ -40,7 +40,7 @@ export default function Page() {
       ],
     });
 
-    setMsg("TRN Chain adicionada");
+    setMsg("TRN Chain added");
   };
 
   return (
@@ -73,7 +73,7 @@ export default function Page() {
         <section className="grid gap-6 md:grid-cols-2">
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
             <h2 className="text-xl font-semibold">TRN Token</h2>
-            <p className="mt-2 text-sm text-zinc-300">Atualmente a DEX trabalha com o ativo nativo TRN.</p>
+            <p className="mt-2 text-sm text-zinc-300">The DEX currently supports the native TRN asset only.</p>
 
             <div className="mt-5 rounded-2xl border border-violet-300/25 bg-black/35 p-4">
               <p className="text-xs uppercase tracking-wider text-zinc-400">Asset</p>
@@ -89,14 +89,14 @@ export default function Page() {
           <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
             <h2 className="text-xl font-semibold">Status</h2>
             <ul className="mt-4 space-y-2 text-sm text-zinc-300">
-              <li>• Rede configurada: TRN Chain</li>
+              <li>• Network configured: TRN Chain</li>
               <li>• Chain ID: 210866</li>
-              <li>• Token nativo: TRN</li>
-              <li>• Suporte inicial: TRN-only</li>
+              <li>• Native token: TRN</li>
+              <li>• Initial support: TRN-only</li>
             </ul>
 
             <div className="mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-zinc-300">
-              Mais pares e liquidez serão habilitados nas próximas etapas.
+              More pairs and liquidity options will be enabled in upcoming phases.
             </div>
           </div>
         </section>
