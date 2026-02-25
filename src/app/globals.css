@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+:root {
+  --background: #05060a;
+  --foreground: #f5f7ff;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(1100px 620px at 50% -10%, rgba(168, 85, 247, 0.22), transparent 62%),
+    radial-gradient(900px 520px at 0% 40%, rgba(34, 211, 238, 0.14), transparent 62%),
+    radial-gradient(800px 520px at 100% 70%, rgba(250, 204, 21, 0.09), transparent 58%),
+    linear-gradient(180deg, #06070d 0%, #05060a 45%, #040509 100%);
+  color: var(--foreground);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.45;
+  background-image:
+    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.08) 0 1px, transparent 1px),
+    radial-gradient(circle at 75% 60%, rgba(255,255,255,0.08) 0 1px, transparent 1px);
+  background-size: 140px 140px, 180px 180px;
+  animation: floatField 14s linear infinite;
+}
+
+.fade-in {
+  animation: fadeUp 0.7s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes floatField {
+  from { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  to { transform: translateY(0px); }
+}
+
+.progress-wrap {
+  position: relative;
+}
+
+.progress-fill {
+  animation: progressPulse 2.6s ease-in-out infinite;
+}
+
+.progress-glow {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  transform: translateX(-100%);
+  animation: progressShine 2.2s linear infinite;
+}
+
+@keyframes progressPulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.15); }
+}
+
+@keyframes progressShine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(240%); }
+}
