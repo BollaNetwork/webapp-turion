@@ -1,22 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-const TOKENS = ["TRN", "USDT", "USDC", "ETH"];
+import { useState } from "react";
 
 export default function Page() {
-  const [wallet, setWallet] = useState<string>("");
-  const [tokenIn, setTokenIn] = useState("TRN");
-  const [tokenOut, setTokenOut] = useState("USDT");
-  const [amountIn, setAmountIn] = useState("100");
-  const [slippage, setSlippage] = useState("0.5");
+  const [wallet, setWallet] = useState("");
   const [msg, setMsg] = useState("");
-
-  const amountOut = useMemo(() => {
-    const n = Number(amountIn || 0);
-    if (!Number.isFinite(n)) return "0.00";
-    return (n * 0.98).toFixed(2);
-  }, [amountIn]);
 
   const connect = async () => {
     const w = window as any;
@@ -31,6 +19,7 @@ export default function Page() {
     const w = window as any;
     const provider = w.ethereum?.providers?.find((p: any) => p?.isMetaMask) || w.ethereum;
     if (!provider) return setMsg("MetaMask não encontrada");
+
     try {
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x337b2" }] });
       setMsg("TRN Chain selecionada");
@@ -38,69 +27,82 @@ export default function Page() {
     } catch (e: any) {
       if (e?.code !== 4902) return setMsg("Erro ao trocar rede");
     }
+
     await provider.request({
       method: "wallet_addEthereumChain",
-      params: [{
-        chainId: "0x337b2",
-        chainName: "TRN Chain",
-        nativeCurrency: { name: "Turion", symbol: "TRN", decimals: 18 },
-        rpcUrls: ["https://node1.turion.network/rpc"],
-      }],
+      params: [
+        {
+          chainId: "0x337b2",
+          chainName: "TRN Chain",
+          nativeCurrency: { name: "Turion", symbol: "TRN", decimals: 18 },
+          rpcUrls: ["https://node1.turion.network/rpc"],
+        },
+      ],
     });
-    setMsg("Rede adicionada");
+
+    setMsg("TRN Chain adicionada");
   };
 
   return (
-    <main style={{ minHeight: "100vh", background: "radial-gradient(1000px 600px at 20% 0%, #3b0764 0%, #09090b 55%)", color: "#fff", padding: 24 }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-          <h1 style={{ fontSize: 32, fontWeight: 700 }}>TRN DEX</h1>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={addNetwork} style={btnGhost}>Add TRN Chain</button>
-            <button onClick={connect} style={btnPrimary}>{wallet ? wallet.slice(0, 6) + "..." + wallet.slice(-4) : "Connect Wallet"}</button>
+    <main className="min-h-screen bg-[#06060a] text-white">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(1000px_500px_at_20%_0%,rgba(147,51,234,.22),transparent_65%),radial-gradient(800px_420px_at_100%_20%,rgba(168,85,247,.15),transparent_60%)]" />
+
+      <div className="relative mx-auto max-w-5xl px-4 pb-16 pt-10">
+        <header className="mb-10 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-violet-300">Turion Exchange</p>
+            <h1 className="mt-2 text-4xl font-semibold md:text-5xl">TRN DEX</h1>
           </div>
-        </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr", gap: 16 }}>
-          <div style={card}>
-            <h2 style={{ marginBottom: 12 }}>Swap</h2>
-            <div style={row}>
-              <input value={amountIn} onChange={(e) => setAmountIn(e.target.value)} placeholder="0.00" style={input} />
-              <select value={tokenIn} onChange={(e) => setTokenIn(e.target.value)} style={select}>{TOKENS.map(t => <option key={t}>{t}</option>)}</select>
-            </div>
-            <div style={{ textAlign: "center", margin: "10px 0", opacity: 0.7 }}>↓</div>
-            <div style={row}>
-              <input value={amountOut} readOnly style={input} />
-              <select value={tokenOut} onChange={(e) => setTokenOut(e.target.value)} style={select}>{TOKENS.map(t => <option key={t}>{t}</option>)}</select>
-            </div>
-
-            <div style={{ marginTop: 14, fontSize: 14, opacity: 0.85 }}>
-              <div>Slippage: {slippage}%</div>
-              <input type="range" min="0.1" max="5" step="0.1" value={slippage} onChange={(e)=>setSlippage(e.target.value)} style={{ width: "100%" }} />
-              <div style={{ marginTop: 8 }}>Price impact (mock): 0.32%</div>
-            </div>
-
-            <button style={{ ...btnPrimary, width: "100%", marginTop: 16 }}>Preview Swap</button>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={addNetwork}
+              className="rounded-full border border-violet-300/40 bg-violet-300/10 px-4 py-2 text-sm font-semibold text-violet-200 hover:bg-violet-300/20"
+            >
+              Add TRN Chain
+            </button>
+            <button
+              onClick={connect}
+              className="rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
+            >
+              {wallet ? `${wallet.slice(0, 6)}...${wallet.slice(-4)}` : "Connect Wallet"}
+            </button>
           </div>
-        </div>
+        </header>
 
-        {msg && <p style={{ marginTop: 14, color: "#c4b5fd" }}>{msg}</p>}
+        <section className="grid gap-6 md:grid-cols-2">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
+            <h2 className="text-xl font-semibold">TRN Token</h2>
+            <p className="mt-2 text-sm text-zinc-300">Atualmente a DEX trabalha com o ativo nativo TRN.</p>
+
+            <div className="mt-5 rounded-2xl border border-violet-300/25 bg-black/35 p-4">
+              <p className="text-xs uppercase tracking-wider text-zinc-400">Asset</p>
+              <p className="mt-1 text-2xl font-semibold">TRN</p>
+              <p className="mt-1 text-xs text-zinc-400">Network: TRN Chain (210866)</p>
+            </div>
+
+            <button className="mt-5 w-full rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 py-3 font-semibold text-white hover:brightness-110">
+              Trade TRN (beta)
+            </button>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-xl">
+            <h2 className="text-xl font-semibold">Status</h2>
+            <ul className="mt-4 space-y-2 text-sm text-zinc-300">
+              <li>• Rede configurada: TRN Chain</li>
+              <li>• Chain ID: 210866</li>
+              <li>• Token nativo: TRN</li>
+              <li>• Suporte inicial: TRN-only</li>
+            </ul>
+
+            <div className="mt-5 rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-zinc-300">
+              Mais pares e liquidez serão habilitados nas próximas etapas.
+            </div>
+          </div>
+        </section>
+
+        {msg ? <p className="mt-5 text-sm text-violet-300">{msg}</p> : null}
       </div>
     </main>
   );
 }
-
-const card: React.CSSProperties = {
-  background: "rgba(24,24,27,0.82)",
-  border: "1px solid rgba(168,85,247,0.35)",
-  borderRadius: 20,
-  padding: 20,
-  maxWidth: 520,
-  margin: "0 auto",
-  boxShadow: "0 0 40px rgba(168,85,247,0.18)",
-};
-const row: React.CSSProperties = { display: "flex", gap: 10, alignItems: "center" };
-const input: React.CSSProperties = { flex: 1, background: "#09090b", border: "1px solid #3f3f46", color: "#fff", borderRadius: 12, padding: "12px 14px" };
-const select: React.CSSProperties = { background: "#111827", color: "#fff", border: "1px solid #3f3f46", borderRadius: 12, padding: "12px" };
-const btnPrimary: React.CSSProperties = { background: "linear-gradient(90deg,#a855f7,#22d3ee)", color: "#000", border: 0, borderRadius: 12, padding: "10px 14px", fontWeight: 700, cursor: "pointer" };
-const btnGhost: React.CSSProperties = { background: "transparent", color: "#ddd6fe", border: "1px solid rgba(196,181,253,.35)", borderRadius: 12, padding: "10px 14px", fontWeight: 600, cursor: "pointer" };
