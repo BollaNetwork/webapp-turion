@@ -10,20 +10,36 @@ const DONATION = {
 
 type Net = keyof typeof DONATION;
 
+const netConfig: Record<Net, { active: string; border: string; text: string }> = {
+  BTC: {
+    active: "border-orange-400/50 bg-orange-400/12 text-orange-300",
+    border: "border-orange-400/30",
+    text: "text-orange-300",
+  },
+  SOL: {
+    active: "border-purple-400/50 bg-purple-400/12 text-purple-300",
+    border: "border-purple-400/30",
+    text: "text-purple-300",
+  },
+  ETH: {
+    active: "border-cyan-400/50 bg-cyan-400/12 text-cyan-300",
+    border: "border-cyan-400/30",
+    text: "text-cyan-300",
+  },
+};
+
+const inputClass =
+  "mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 font-mono text-sm text-zinc-200 placeholder:text-zinc-700 focus:border-cyan-500/40 focus:outline-none transition";
+
 export default function FundraisingFlow() {
   const [net, setNet] = useState<Net>("ETH");
   const [msg, setMsg] = useState("");
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({
-    email: "",
-    amount: "",
-    wallet: "",
-    txHash: "",
-  });
+  const [form, setForm] = useState({ email: "", amount: "", wallet: "", txHash: "" });
 
   const copy = async (text: string) => {
     await navigator.clipboard.writeText(text);
-    setMsg("Address copied");
+    setMsg("Address copied to clipboard");
     setTimeout(() => setMsg(""), 1800);
   };
 
@@ -37,57 +53,122 @@ export default function FundraisingFlow() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.error || "Failed");
-      setMsg("Saved. We will send TRN after verification.");
+      setMsg("Saved. TRN rewards sent after verification.");
       setForm({ email: "", amount: "", wallet: "", txHash: "" });
     } catch (e: any) {
       setMsg(e.message || "Error saving");
     } finally {
       setLoading(false);
-      setTimeout(() => setMsg(""), 2500);
+      setTimeout(() => setMsg(""), 3000);
     }
   };
 
-  return (
-    <div className="rounded-3xl border border-yellow-300/30 bg-black/50 p-6 backdrop-blur-xl">
-      <h3 className="text-2xl font-semibold text-yellow-300">Fundraising — Help Turion Reach $200k</h3>
-      <p className="mt-2 text-zinc-300">Choose a network, send your donation, then submit your wallet so we can send TRN rewards.</p>
+  const cfg = netConfig[net];
 
-      <div className="mt-4 flex flex-wrap gap-2">
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-yellow-400/18 bg-black/60 p-6 backdrop-blur-xl">
+      <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-yellow-400/40 to-transparent" />
+
+      <p className="font-mono text-[10px] uppercase tracking-[0.25em] text-yellow-400/60">Fundraising Round</p>
+      <h3 className="mt-1 text-xl font-bold text-white">Help Turion Reach $200,000</h3>
+      <p className="mt-1.5 text-sm text-zinc-400">
+        Send your donation, then submit your wallet to receive TRN token rewards.
+      </p>
+
+      {/* Network selector */}
+      <div className="mt-5 flex gap-2">
         {(["BTC", "SOL", "ETH"] as Net[]).map((n) => (
-          <button key={n} onClick={() => setNet(n)} className={`rounded-full px-4 py-2 text-sm font-semibold ${net === n ? "bg-yellow-300 text-black" : "border border-white/20"}`}>
+          <button
+            key={n}
+            onClick={() => setNet(n)}
+            className={`flex-1 rounded-lg border py-2.5 font-mono text-sm font-bold tracking-wider transition ${
+              net === n
+                ? netConfig[n].active
+                : "border-white/[0.08] text-zinc-600 hover:border-white/15 hover:text-zinc-400"
+            }`}
+          >
             {n}
           </button>
         ))}
       </div>
 
-      <div className="mt-4 rounded-xl border border-white/10 bg-zinc-900/80 p-4">
-        <p className="text-xs text-zinc-400">Donation address ({net})</p>
-        <p className="mt-1 break-all font-mono text-sm text-cyan-300">{DONATION[net]}</p>
-        <button onClick={() => copy(DONATION[net])} className="mt-3 rounded-lg border border-cyan-300/40 px-3 py-1.5 text-sm">Copy Address</button>
+      {/* Donation address */}
+      <div className={`mt-4 rounded-xl border bg-black/50 p-4 ${cfg.border}`}>
+        <p className="font-mono text-[10px] uppercase tracking-wider text-zinc-600">
+          Donation Address ({net})
+        </p>
+        <p className={`mt-2 break-all font-mono text-sm ${cfg.text}`}>{DONATION[net]}</p>
+        <button
+          onClick={() => copy(DONATION[net])}
+          className={`mt-3 rounded-lg border px-3 py-1.5 font-mono text-xs transition hover:bg-white/[0.04] ${cfg.border} ${cfg.text}`}
+        >
+          Copy Address
+        </button>
       </div>
 
+      {/* Form */}
       <div className="mt-5 space-y-3">
-        <div className="grid gap-2">
-          <label className="text-xs text-zinc-400">Your wallet address (to receive TRN)</label>
-          <input value={form.wallet} onChange={(e) => setForm({ ...form, wallet: e.target.value })} placeholder="0x... / bc1... / Sol..." className="rounded-xl border border-white/15 bg-zinc-950/70 px-3 py-3" />
+        <div>
+          <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-600">
+            Your wallet — to receive TRN
+          </label>
+          <input
+            value={form.wallet}
+            onChange={(e) => setForm({ ...form, wallet: e.target.value })}
+            placeholder="0x... or bc1... or Sol..."
+            className={inputClass}
+          />
         </div>
-        <div className="grid gap-2 md:grid-cols-2">
-          <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">Amount donated ({net})</label>
-            <input value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} placeholder="Ex: 0.25" className="rounded-xl border border-white/15 bg-zinc-950/70 px-3 py-3" />
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div>
+            <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-600">
+              Amount ({net})
+            </label>
+            <input
+              value={form.amount}
+              onChange={(e) => setForm({ ...form, amount: e.target.value })}
+              placeholder="0.25"
+              className={inputClass}
+            />
           </div>
-          <div className="grid gap-2">
-            <label className="text-xs text-zinc-400">Email (optional)</label>
-            <input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="you@email.com" className="rounded-xl border border-white/15 bg-zinc-950/70 px-3 py-3" />
+          <div>
+            <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-600">
+              Email (optional)
+            </label>
+            <input
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="you@email.com"
+              className="mt-1.5 w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-700 focus:border-cyan-500/40 focus:outline-none transition"
+            />
           </div>
+        </div>
+
+        <div>
+          <label className="font-mono text-[10px] uppercase tracking-wider text-zinc-600">
+            Transaction Hash (recommended)
+          </label>
+          <input
+            value={form.txHash}
+            onChange={(e) => setForm({ ...form, txHash: e.target.value })}
+            placeholder="0xabc123..."
+            className={inputClass}
+          />
         </div>
       </div>
-      <input value={form.txHash} onChange={(e) => setForm({ ...form, txHash: e.target.value })} placeholder="Transaction hash (optional, recommended)" className="mt-3 w-full rounded-xl border border-white/15 bg-zinc-950/70 px-3 py-3" />
 
-      <button onClick={submit} disabled={loading} className="mt-4 rounded-xl bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-5 py-2 font-semibold text-black disabled:opacity-60">
-        {loading ? "Saving..." : "I Donated — Save My Info"}
+      <button
+        onClick={submit}
+        disabled={loading}
+        className="mt-5 w-full rounded-xl bg-gradient-to-r from-yellow-500 to-yellow-400 py-3 font-bold text-black transition hover:brightness-110 hover:shadow-[0_0_25px_rgba(251,191,36,0.3)] disabled:opacity-50"
+      >
+        {loading ? "Saving…" : "I Donated — Register My Contribution"}
       </button>
-      {msg ? <p className="mt-3 text-sm text-yellow-300">{msg}</p> : null}
+
+      {msg && (
+        <p className="mt-3 text-center font-mono text-xs text-cyan-300">{msg}</p>
+      )}
     </div>
   );
 }

@@ -1,17 +1,22 @@
 @import "tailwindcss";
 
 :root {
-  --background: #05060a;
-  --foreground: #f5f7ff;
+  --background: #020509;
+  --foreground: #e8f4f8;
+  --neon-cyan: #00d4ff;
+  --neon-purple: #9d4edd;
+  --neon-green: #00ff9d;
+  --gold: #fbbf24;
 }
 
 body {
   min-height: 100vh;
-  background:
-    radial-gradient(1100px 620px at 50% -10%, rgba(168, 85, 247, 0.22), transparent 62%),
-    radial-gradient(900px 520px at 0% 40%, rgba(34, 211, 238, 0.14), transparent 62%),
-    radial-gradient(800px 520px at 100% 70%, rgba(250, 204, 21, 0.09), transparent 58%),
-    linear-gradient(180deg, #06070d 0%, #05060a 45%, #040509 100%);
+  background-color: var(--background);
+  background-image:
+    radial-gradient(ellipse 1400px 800px at 50% -5%, rgba(0, 212, 255, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 1000px 700px at 0% 50%, rgba(157, 78, 221, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 900px 700px at 100% 80%, rgba(0, 255, 157, 0.05) 0%, transparent 60%),
+    linear-gradient(180deg, #020509 0%, #030810 50%, #020509 100%);
   color: var(--foreground);
 }
 
@@ -19,19 +24,42 @@ body {
   box-sizing: border-box;
 }
 
+/* Animated blockchain grid overlay */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
-  opacity: 0.45;
+  z-index: 0;
   background-image:
-    radial-gradient(circle at 15% 20%, rgba(255,255,255,0.08) 0 1px, transparent 1px),
-    radial-gradient(circle at 75% 60%, rgba(255,255,255,0.08) 0 1px, transparent 1px);
-  background-size: 140px 140px, 180px 180px;
-  animation: floatField 14s linear infinite;
+    linear-gradient(rgba(0, 212, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 212, 255, 0.035) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 40%, black 20%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 80% at 50% 40%, black 20%, transparent 80%);
+  animation: gridScroll 25s linear infinite;
 }
 
+/* Node dots at grid intersections */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: radial-gradient(circle, rgba(0, 212, 255, 0.18) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 10%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, black 10%, transparent 70%);
+  animation: gridScroll 25s linear infinite;
+}
+
+@keyframes gridScroll {
+  from { transform: translateY(0px); }
+  to { transform: translateY(64px); }
+}
+
+/* Fade in animations */
 .fade-in {
   animation: fadeUp 0.7s ease both;
 }
@@ -39,7 +67,7 @@ body::before {
 @keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(14px);
   }
   to {
     opacity: 1;
@@ -47,32 +75,81 @@ body::before {
   }
 }
 
-@keyframes floatField {
-  from { transform: translateY(0px); }
-  50% { transform: translateY(-12px); }
-  to { transform: translateY(0px); }
+/* Live pulse dot */
+.live-dot {
+  width: 7px;
+  height: 7px;
+  background: #00ff9d;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.5);
+  animation: livePulse 2s ease-out infinite;
 }
 
+@keyframes livePulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0.6); }
+  70% { box-shadow: 0 0 0 7px rgba(0, 255, 157, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 255, 157, 0); }
+}
+
+/* Network status ticker */
+@keyframes hashScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.hash-ticker {
+  animation: hashScroll 28s linear infinite;
+}
+
+/* Progress bar */
 .progress-wrap {
   position: relative;
 }
 
 .progress-fill {
-  animation: progressPulse 2.6s ease-in-out infinite;
+  animation: progressPulse 3s ease-in-out infinite;
 }
 
 .progress-glow {
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.45), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
   transform: translateX(-100%);
-  animation: progressShine 2.2s linear infinite;
+  animation: progressShine 2.4s linear infinite;
 }
 
 @keyframes progressPulse {
-  0%, 100% { filter: brightness(1); }
-  50% { filter: brightness(1.15); }
+  0%, 100% { filter: brightness(1) drop-shadow(0 0 5px rgba(0, 212, 255, 0.5)); }
+  50% { filter: brightness(1.18) drop-shadow(0 0 10px rgba(0, 212, 255, 0.9)); }
 }
 
 @keyframes progressShine {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(240%); }
+}
+
+/* Neon glow card hover effect */
+.card-glow-cyan:hover {
+  box-shadow: 0 0 0 1px rgba(0, 212, 255, 0.25), 0 0 30px rgba(0, 212, 255, 0.08);
+}
+
+.card-glow-purple:hover {
+  box-shadow: 0 0 0 1px rgba(157, 78, 221, 0.3), 0 0 30px rgba(157, 78, 221, 0.08);
+}
+
+/* Cursor blink for terminal effects */
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.cursor-blink::after {
+  content: "_";
+  animation: blink 1s step-end infinite;
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: rgba(2, 5, 9, 0.6);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }

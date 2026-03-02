@@ -27,19 +27,13 @@ export default function MetaMaskActions() {
     };
 
     try {
-      // 1) Try switch first (if network already exists)
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x337b2" }] });
-      setMsg("Turion selected in MetaMask");
+      setMsg("Turion selected in MetaMask ✓");
       setTimeout(() => setMsg(""), 2500);
       return;
     } catch (switchErr: any) {
-      // 4902 = unknown chain, then add it
       if (switchErr?.code !== 4902) {
-        if (switchErr?.code === 4001) {
-          setMsg("Request canceled in MetaMask");
-        } else {
-          setMsg(`MetaMask switch error (${switchErr?.code ?? "unknown"})`);
-        }
+        setMsg(switchErr?.code === 4001 ? "Cancelled" : `Error (${switchErr?.code ?? "unknown"})`);
         setTimeout(() => setMsg(""), 3000);
         return;
       }
@@ -48,30 +42,41 @@ export default function MetaMaskActions() {
     try {
       await provider.request({ method: "wallet_addEthereumChain", params: [params] });
       await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x337b2" }] });
-      setMsg("Turion added and selected in MetaMask");
+      setMsg("Turion added to MetaMask ✓");
       setTimeout(() => setMsg(""), 2500);
     } catch (e: any) {
-      if (e?.code === 4001) {
-        setMsg("Request canceled in MetaMask");
-      } else {
-        setMsg(`MetaMask add error (${e?.code ?? "unknown"})`);
-      }
+      setMsg(e?.code === 4001 ? "Cancelled" : `Error (${e?.code ?? "unknown"})`);
       setTimeout(() => setMsg(""), 3000);
     }
   };
 
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-3">
-      <button onClick={add} className="rounded-xl bg-yellow-300 px-4 py-2 font-semibold text-black hover:brightness-95">
-        Add Turion Network to MetaMask
+    <div className="mt-4 space-y-2.5">
+      {/* MetaMask button */}
+      <button
+        onClick={add}
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#f6851b] px-4 py-3 font-bold text-white transition hover:bg-[#e07318] hover:shadow-[0_0_25px_rgba(246,133,27,0.35)]"
+      >
+        <span>🦊</span> Add Turion to MetaMask
       </button>
-      <button onClick={() => copy("https://node1.turion.network/rpc", "RPC URL")} className="rounded-xl border border-purple-400 px-4 py-2 hover:bg-purple-500/20">
-        Copy RPC
-      </button>
-      <button onClick={() => copy("210866", "Chain ID")} className="rounded-xl border border-purple-400 px-4 py-2 hover:bg-purple-500/20">
-        Copy Chain ID
-      </button>
-      {msg ? <span className="text-sm text-yellow-300">{msg}</span> : null}
+
+      {/* Copy buttons */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={() => copy("https://node1.turion.network/rpc", "RPC URL")}
+          className="rounded-xl border border-cyan-500/25 bg-cyan-500/[0.05] px-3 py-2 font-mono text-xs text-cyan-400 transition hover:border-cyan-500/50 hover:bg-cyan-500/[0.10]"
+        >
+          Copy RPC URL
+        </button>
+        <button
+          onClick={() => copy("210866", "Chain ID")}
+          className="rounded-xl border border-cyan-500/25 bg-cyan-500/[0.05] px-3 py-2 font-mono text-xs text-cyan-400 transition hover:border-cyan-500/50 hover:bg-cyan-500/[0.10]"
+        >
+          Copy Chain ID
+        </button>
+      </div>
+
+      {msg && <p className="text-center font-mono text-xs text-green-400">{msg}</p>}
     </div>
   );
 }
